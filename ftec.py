@@ -7,16 +7,7 @@ import asyncio, pty, os, signal, multiprocessing, time, datetime, logging, sys, 
 import config
 #
 #############################
-# Logging section
-LogDaemon='/opt/ftecheck/daemon.log'
-LogFile='/opt/ftecheck/ftecheck.log'
-LogFormat='%(asctime)s %(levelname)s %(module)s %(funcName)s %(messages)s'
-#LogLevel=logging.DEBUG
-#LogLevel=logging.WARNING
-LogLevel=logging.INFO
-#
-#############################
-#
+
 async def run (cmd):
     try:
         logging.info('run: {}'.format(cmd))
@@ -56,8 +47,8 @@ def timeconv (sourcetime, type):
 #
 
 def ftecd():
-    logging.basicConfig(filename=LogFile, format=LogFormat, level=LogLevel)
-    lh=logging.FileHandler(LogFile)
+    logging.basicConfig(filename=config.LogFile, format=config.LogFormat, level=config.LogLevel)
+    lh=logging.FileHandler(config.LogFile)
     logging.getLogger('').addHandler(lh)
     #
     logging.info("ftecheck daemon entering")
@@ -109,12 +100,12 @@ def ftecd():
             if now_posix > elections_end:
                 logging.info("\tThe elections for the next round is already over")
                 try:
-                    script_before_end_of_current_cycle
+                    config.script_before_end_of_current_cycle
                 except NameError:
                     pass
                 else:
-                    if script_before_end_of_current_cycle != '':
-                        scripts_result=asyncio.run(run (script_before_end_of_current_cycle))
+                    if config.script_before_end_of_current_cycle != '':
+                        scripts_result=asyncio.run(run (config.script_before_end_of_current_cycle))
                         logging.info("\tscript_before_end_of_current_cycle:\n{}".format(scripts_result))
                     #
                 #
@@ -123,12 +114,12 @@ def ftecd():
             else:
                 logging.info("\tThe elections for the next round is not started yet")
                 try:
-                    script_at_start_of_new_cycle
+                    config.script_at_start_of_new_cycle
                 except NameError:
                     pass
                 else:
-                    if script_at_start_of_new_cycle != '':
-                        scripts_result=asyncio.run(run (script_at_start_of_new_cycle))
+                    if config.script_at_start_of_new_cycle != '':
+                        scripts_result=asyncio.run(run (config.script_at_start_of_new_cycle))
                         logging.info("\tscript_at_start_of_new_cycle:\n{}".format(scripts_result))
                     #
                 #
@@ -141,12 +132,12 @@ def ftecd():
                 logging.info("\tElections are about to close! {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
                 try:
-                    script_elections_about_to_close
+                    config.script_elections_about_to_close
                 except NameError:
                     pass
                 else:
-                    if script_elections_about_to_close != '':
-                        scripts_result=asyncio.run(run (script_elections_about_to_close))
+                    if config.script_elections_about_to_close != '':
+                        scripts_result=asyncio.run(run (config.script_elections_about_to_close))
                         logging.info("\tscript_elections_about_to_close:\n{}".format(scripts_result))
                     #
                 #
@@ -155,12 +146,12 @@ def ftecd():
                 logging.info("\tElections are opened.")
                 #
                 try:
-                    script_elections_just_started
+                    config.script_elections_just_started
                 except NameError:
                     pass
                 else:
-                    if script_elections_just_started != '':
-                        scripts_result=asyncio.run(run (script_elections_just_started))
+                    if config.script_elections_just_started != '':
+                        scripts_result=asyncio.run(run (config.script_elections_just_started))
                         logging.info("\tscript_elections_just_started:\n{}".format(scripts_result))
                     #
                 #
@@ -189,6 +180,7 @@ if __name__ == '__main__':
         try:
             ftecd()
         except:
-            with open (LogDaemon, 'a') as f:
+            with open (config.LogDaemon, 'a') as f:
                 print("==== An exception caught ====\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0]), file=f)
+                sys.exit(0)
 
