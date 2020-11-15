@@ -56,7 +56,7 @@ def ftecd():
         # offset in seconds 10m=600
         offset=600          # general fime offset
         send_offset=300     # offset of the first try ot send stake
-        recheck_offset=60   # offset for rechecking (whether our stake was discarded) after the stake has been sent
+        recheck_offset=60   # offset for rechecking
         #
         now_local=datetime.datetime.now()
         now_posix=timeconv(now_local, 'P')
@@ -154,7 +154,7 @@ def ftecd():
                         scripts_result=asyncio.run(run (config.script_elections_just_started))
                         logging.info("\tscript_elections_just_started:\n{}".format(scripts_result))
                     #
-                #
+                wait_until=elections_end-send_offset
             #
         #
         seconds=wait_until-now_posix
@@ -181,6 +181,6 @@ if __name__ == '__main__':
             ftecd()
         except:
             with open (config.LogDaemon, 'a') as f:
-                print("==== An exception caught ====\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0]), file=f)
+                print("==== An exception caught ====\n{}\n{}\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]), file=f)
                 sys.exit(0)
 
