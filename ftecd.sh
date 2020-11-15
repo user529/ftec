@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . /lib/lsb/init-functions
-. ./ftec.conf
+. ./ftecd.conf
 
 case "$1" in
     start)
