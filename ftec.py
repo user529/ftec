@@ -106,7 +106,6 @@ def ftecd():
                 else:
                     if config.script_before_end_of_current_cycle != '':
                         scripts_result=asyncio.run(run (config.script_before_end_of_current_cycle))
-                        logging.info("\tscript_before_end_of_current_cycle:\n{}".format(scripts_result))
                     #
                 #
                 wait_until=curr_until_posix+offset
@@ -120,7 +119,6 @@ def ftecd():
                 else:
                     if config.script_at_start_of_new_cycle != '':
                         scripts_result=asyncio.run(run (config.script_at_start_of_new_cycle))
-                        logging.info("\tscript_at_start_of_new_cycle:\n{}".format(scripts_result))
                     #
                 #
                 wait_until=elections_start+offset
@@ -138,7 +136,6 @@ def ftecd():
                 else:
                     if config.script_elections_about_to_close != '':
                         scripts_result=asyncio.run(run (config.script_elections_about_to_close))
-                        logging.info("\tscript_elections_about_to_close:\n{}".format(scripts_result))
                     #
                 #
                 wait_until=now_posix+recheck_offset
@@ -152,7 +149,6 @@ def ftecd():
                 else:
                     if config.script_elections_just_started != '':
                         scripts_result=asyncio.run(run (config.script_elections_just_started))
-                        logging.info("\tscript_elections_just_started:\n{}".format(scripts_result))
                     #
                 wait_until=elections_end-send_offset
             #
