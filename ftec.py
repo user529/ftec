@@ -35,7 +35,8 @@ def timeconv (sourcetime, type):
     if type=='L': # Convert timestamp to Local
         covertedtime=datetime.datetime.fromtimestamp(sourcetime)
     elif type=='P': #Convert local to Posix timestamp
-        covertedtime=datetime.datetime.timestamp(sourcetime)
+        #covertedtime=datetime.datetime.timestamp(sourcetime)
+        covertedtime=int(datetime.datetime.timestamp(sourcetime))
     else:
         print ("Unknown type {}".format(type))
         return False
