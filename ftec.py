@@ -10,7 +10,7 @@ import config
 
 async def run (cmd):
     try:
-        logging.info('run: {}'.format(cmd))
+        logging.info('\trun: {}'.format(cmd))
         ms, sl = pty.openpty()
         proc=await asyncio.create_subprocess_shell(
             cmd,
@@ -25,7 +25,7 @@ async def run (cmd):
             result=stderr.decode('UTF-8')
         else:
             result=stdout.decode('UTF-8')
-        logging.info('Completed with result:\n--------\n{}\n--------'.format(result))
+        logging.info('\tCompleted with result:\n--------\n{}\n--------'.format(result))
         return result.rstrip('\n')
     except Exception as e:
         return "ERROR: run({}) failed with an exception:\n--------\n{}\n--------".format(cmd, e)
@@ -33,14 +33,14 @@ async def run (cmd):
 
 def timeconv (sourcetime, type):
     if type=='L': # Convert timestamp to Local
-        covertedtime=datetime.datetime.fromtimestamp(sourcetime)
+        convertedtime=datetime.datetime.fromtimestamp(sourcetime)
     elif type=='P': #Convert local to Posix timestamp
-        #covertedtime=datetime.datetime.timestamp(sourcetime)
-        covertedtime=int(datetime.datetime.timestamp(sourcetime))
+        convertedtime=datetime.datetime.timestamp(sourcetime)
+        #convertedtime=int(datetime.datetime.timestamp(sourcetime))
     else:
         print ("Unknown type {}".format(type))
         return False
-    return covertedtime
+    return convertedtime
 
 
 #############################
@@ -66,18 +66,18 @@ def ftecd():
         get_active_election='ftn runget active_election_id | grep "Result:" | awk \'{ print $2 }\' | tr -d \\[\\]\\"'
         active_election_hex=asyncio.run(run (get_active_election))
         active_election_dec=int(active_election_hex,16)
-        logging.info("\tActive elections id {} / {}".format(active_election_hex, active_election_dec))
+        logging.info("Active elections id {} / {}".format(active_election_hex, active_election_dec))
         #
         # Get time when the current round ends
         get_until="ftn getconfig 34 | grep 'utime_until' | awk '{print $2}'"
         curr_until_posix=int(asyncio.run(run (get_until)))
         curr_until_local=timeconv(curr_until_posix, 'L')
-        logging.info("\tCurrent round until {} / {}".format(curr_until_posix,curr_until_local))
+        logging.info("Current round until {} / {}".format(curr_until_posix,curr_until_local))
         #
         if now_posix > curr_until_posix:
-            logging.info("\tSeems the current round is over but the next is not started. Possibly FreeTON network is down.")
+            logging.info("Seems the current round is over but the next is not started. Possibly FreeTON network is down.")
             seconds=3600
-            logging.info("\tSleep {} sec".format(seconds))
+            logging.info("Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
         #
@@ -93,13 +93,13 @@ def ftecd():
         #
         if active_election_dec == 0:
             # No active elections
-            logging.info("\tNo active elections.")
+            logging.info("No active elections.")
             #
-            logging.info("\t\tNext elections starts at {} / {}".format(elections_start,timeconv(elections_start, 'L')))
-            logging.info("\t\tNext elections ends at {} / {}".format(elections_end, timeconv(elections_end, 'L')))
+            logging.info("\tNext elections starts at {} / {}".format(elections_start,timeconv(elections_start, 'L')))
+            logging.info("\tNext elections ends at {} / {}".format(elections_end, timeconv(elections_end, 'L')))
             #
             if now_posix > elections_end:
-                logging.info("\tThe elections for the next round is already over")
+                logging.info("The elections for the next round is already over")
                 try:
                     config.script_before_end_of_current_cycle
                 except NameError:
@@ -110,9 +110,9 @@ def ftecd():
                     #
                 #
                 wait_until=curr_until_posix+offset
-                logging.info("\t\tWaiting for the next round to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                logging.info("\tWaiting for the next round to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
             else:
-                logging.info("\tThe elections for the next round is not started yet")
+                logging.info("The elections for the next round is not started yet")
                 try:
                     config.script_at_start_of_new_cycle
                 except NameError:
@@ -123,12 +123,12 @@ def ftecd():
                     #
                 #
                 wait_until=elections_start+offset
-                logging.info("\t\tWaiting for the elections to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                logging.info("\tWaiting for the elections to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
             #
         else:
             # Elections are open
             if (now_posix+send_offset) >= elections_end:
-                logging.info("\tElections are about to close! {} / {}".format(elections_end, timeconv(elections_end,'L')))
+                logging.info("Elections are about to close! {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
                 try:
                     config.script_elections_about_to_close
@@ -141,7 +141,7 @@ def ftecd():
                 #
                 wait_until=now_posix+recheck_offset
             else:
-                logging.info("\tElections are opened.")
+                logging.info("Elections are opened.")
                 #
                 try:
                     config.script_elections_just_started
@@ -155,7 +155,7 @@ def ftecd():
             #
         #
         seconds=wait_until-now_posix
-        logging.info("\tSleep {} sec".format(seconds))
+        logging.info("Sleep {} sec".format(seconds))
         time.sleep(seconds)
     #
     logging.info("ftecheck daemon out of cycle}")
