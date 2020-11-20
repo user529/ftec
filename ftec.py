@@ -50,9 +50,10 @@ def recheck (mode):
 # F - enables recheck if elections are over (the current round is about to finish)
 # N - enables recheck if elections are not started (new round is stardet)
 # 0 - recheck disabled (default)
-    if config.recheck_mode.find('0'):
+    logging.info("\trecheck config {} ? mode {}".format(config.recheck_mode, mode))
+    if config.recheck_mode.find("0")>=0:
         return False
-    elif config.recheck_mode.find(mode):
+    elif config.recheck_mode.find(mode)>=0:
         return True
     #
     return False
