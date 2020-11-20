@@ -11,6 +11,7 @@ import config
 async def run (cmd):
     try:
         logging.info('\trun: {}'.format(cmd))
+        cmd="export PATH=$PATH:/home/$(whoami)/ftn;{}".format(cmd) # Bad workaround
         ms, sl = pty.openpty()
         proc=await asyncio.create_subprocess_shell(
             cmd,
@@ -72,7 +73,7 @@ def ftecd():
         now_posix=timeconv(now_local, 'P')
         logging.info("ftecheck started at {} / {}".format(now_posix, now_local))
         #
-        get_active_election='ftn runget active_election_id | grep "Result:" | awk \'{ print $2 }\' | tr -d \\[\\]\\"'
+        get_active_election="ftn runget active_election_id | grep 'Result:' | awk '{ print $2 }' | tr -d '[]\"'"
         active_election_hex=asyncio.run(run (get_active_election))
         active_election_dec=int(active_election_hex,16)
         logging.info("Active elections id {} / {}".format(active_election_hex, active_election_dec))
