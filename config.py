@@ -18,3 +18,20 @@ LogFormat='%(asctime)s %(levelname)s %(module)s %(funcName)s %(messages)s'
 LogLevel=logging.INFO
 #
 #############################
+# offset in seconds 10m=600
+offset=600          # general fime offset
+close_offset=300    # how many seconds before the end of the elections to start the 'script_elections_about_to_close'
+recheck_offset=60   # offset for rechecking
+
+# Recheck modes
+# Allows to repeatedly run script appropriate script with recheck_offset interval
+# 'S' - enables recheck if elections are open and just started 
+# 'C' - enables recheck if elections are open and about to close
+# 'F' - enables recheck if elections are over (the current round is about to finish)
+# 'N' - enables recheck if elections are not started (new round is stardet)
+# Combinations of modes are possible:
+# recheck_mode='SC' or 'CS' will enable recheck for both S and C modes.
+# 'SCFN' is also possible, but maybe you want a cron script instead.
+# '0' - recheck is disabled (default)
+# Be aware, if you put 0 into a string, like 'S0' - it will disable recheck for S-option also
+recheck_mode='0'

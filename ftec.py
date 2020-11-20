@@ -43,6 +43,20 @@ def timeconv (sourcetime, type):
     return convertedtime
 
 
+def recheck (mode):
+# S - enables recheck if elections are open and just started 
+# C - enables recheck if elections are open and about to close
+# F - enables recheck if elections are over (the current round is about to finish)
+# N - enables recheck if elections are not started (new round is stardet)
+# 0 - recheck disabled (default)
+    if config.recheck_mode.find('0'):
+        return False
+    elif config.recheck_mode.find(mode):
+        return True
+    #
+    return False
+
+
 #############################
 # FreeTON Election check
 #
@@ -54,11 +68,6 @@ def ftecd():
     #
     logging.info("ftecheck daemon entering")
     while True:
-        # offset in seconds 10m=600
-        offset=600          # general fime offset
-        send_offset=300     # offset of the first try ot send stake
-        recheck_offset=60   # offset for rechecking
-        #
         now_local=datetime.datetime.now()
         now_posix=timeconv(now_local, 'P')
         logging.info("ftecheck started at {} / {}".format(now_posix, now_local))
@@ -109,8 +118,13 @@ def ftecd():
                         scripts_result=asyncio.run(run (config.script_before_end_of_current_cycle))
                     #
                 #
-                wait_until=curr_until_posix+offset
-                logging.info("\tWaiting for the next round to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                # F - enables recheck if elections are over (the current round is about to finish)
+                if recheck('F'):
+                    wait_until=now_posix+config.recheck_offset
+                else:
+                    wait_until=curr_until_posix+config.offset
+                    logging.info("Waiting for the next round to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                #
             else:
                 logging.info("The elections for the next round is not started yet")
                 try:
@@ -122,12 +136,17 @@ def ftecd():
                         scripts_result=asyncio.run(run (config.script_at_start_of_new_cycle))
                     #
                 #
-                wait_until=elections_start+offset
-                logging.info("\tWaiting for the elections to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                # N - enables recheck if elections are not started (new round is stardet)
+                if recheck('N'):
+                    wait_until=now_posix+config.recheck_offset
+                else:
+                    wait_until=elections_start+config.offset
+                    logging.info("Waiting for the elections to start: {} / {}".format(wait_until, timeconv(wait_until, 'L')))
+                #
             #
         else:
             # Elections are open
-            if (now_posix+send_offset) >= elections_end:
+            if (now_posix+config.close_offset) >= elections_end:
                 logging.info("Elections are about to close! {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
                 try:
@@ -139,9 +158,14 @@ def ftecd():
                         scripts_result=asyncio.run(run (config.script_elections_about_to_close))
                     #
                 #
-                wait_until=now_posix+recheck_offset
+                # C - enables recheck if elections are open and about to close
+                if recheck('C'):
+                    wait_until=now_posix+config.recheck_offset
+                else:
+                    wait_until=elections_end+config.offset
+                #
             else:
-                logging.info("Elections are opened.")
+                logging.info("Elections are opened. {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
                 try:
                     config.script_elections_just_started
@@ -151,7 +175,12 @@ def ftecd():
                     if config.script_elections_just_started != '':
                         scripts_result=asyncio.run(run (config.script_elections_just_started))
                     #
-                wait_until=elections_end-send_offset
+                # S - enables recheck if elections are open and just started 
+                if recheck('S'):
+                    wait_until=now_posix+config.recheck_offset
+                else:
+                    wait_until=elections_end-config.close_offset
+                #
             #
         #
         seconds=wait_until-now_posix
