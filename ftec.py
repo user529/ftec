@@ -46,6 +46,7 @@ def timeconv (sourcetime, type):
 
 def recheck (mode):
 # S - enables recheck if elections are open and just started 
+# O - enables recheck if elections are opened (between 'just started' and 'about to close')
 # C - enables recheck if elections are open and about to close
 # F - enables recheck if elections are over (the current round is about to finish)
 # N - enables recheck if elections are not started (new round is stardet)
@@ -57,6 +58,18 @@ def recheck (mode):
         return True
     #
     return False
+
+
+def runscript (script):
+    try:
+        script
+    except NameError:
+        pass
+    else:
+        if script != '':
+            scripts_result=asyncio.run(run (script))
+        #
+    #
 
 
 #############################
@@ -111,14 +124,15 @@ def ftecd():
             #
             if now_posix > elections_end:
                 logging.info("The elections for the next round is already over")
-                try:
-                    config.script_before_end_of_current_cycle
-                except NameError:
-                    pass
-                else:
-                    if config.script_before_end_of_current_cycle != '':
-                        scripts_result=asyncio.run(run (config.script_before_end_of_current_cycle))
-                    #
+                runscript (config.script_before_end_of_current_cycle)
+#                try:
+#                    config.script_before_end_of_current_cycle
+#                except NameError:
+#                    pass
+#                else:
+#                    if config.script_before_end_of_current_cycle != '':
+#                        scripts_result=asyncio.run(run (config.script_before_end_of_current_cycle))
+#                    #
                 #
                 # F - enables recheck if elections are over (the current round is about to finish)
                 if recheck('F'):
@@ -129,13 +143,14 @@ def ftecd():
                 #
             else:
                 logging.info("The elections for the next round is not started yet")
-                try:
-                    config.script_at_start_of_new_cycle
-                except NameError:
-                    pass
-                else:
-                    if config.script_at_start_of_new_cycle != '':
-                        scripts_result=asyncio.run(run (config.script_at_start_of_new_cycle))
+                runscript (config.script_at_start_of_new_cycle)
+#                try:
+#                    config.script_at_start_of_new_cycle
+#                except NameError:
+#                    pass
+#                else:
+#                    if config.script_at_start_of_new_cycle != '':
+#                        scripts_result=asyncio.run(run (config.script_at_start_of_new_cycle))
                     #
                 #
                 # N - enables recheck if elections are not started (new round is stardet)
@@ -151,13 +166,14 @@ def ftecd():
             if (now_posix+config.close_offset) >= elections_end:
                 logging.info("Elections are about to close! {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
-                try:
-                    config.script_elections_about_to_close
-                except NameError:
-                    pass
-                else:
-                    if config.script_elections_about_to_close != '':
-                        scripts_result=asyncio.run(run (config.script_elections_about_to_close))
+                runscript (config.script_elections_about_to_close)
+#                try:
+#                    config.script_elections_about_to_close
+#                except NameError:
+#                    pass
+#                else:
+#                    if config.script_elections_about_to_close != '':
+#                        scripts_result=asyncio.run(run (config.script_elections_about_to_close))
                     #
                 #
                 # C - enables recheck if elections are open and about to close
@@ -166,19 +182,39 @@ def ftecd():
                 else:
                     wait_until=elections_end+config.offset
                 #
+            elif (now_posix-config.start_offset) <= elections_start:
+                logging.info("Elections just started. {} / {}".format(elections_end, timeconv(elections_end,'L')))
+                #
+                runscript (config.script_elections_about_to_close)
+#                try:
+#                    config.script_elections_about_to_close
+#                except NameError:
+#                    pass
+#                else:
+#                    if config.script_elections_about_to_close != '':
+#                        scripts_result=asyncio.run(run (config.script_elections_about_to_close))
+                    #
+                #
+                # S - enables recheck if elections are open and just started 
+                if recheck('S'):
+                    wait_until=now_posix+config.recheck_offset
+                else:
+                    wait_until=elections_end-config.close_offset
+                #
             else:
                 logging.info("Elections are opened. {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
-                try:
-                    config.script_elections_just_started
-                except NameError:
-                    pass
-                else:
-                    if config.script_elections_just_started != '':
-                        scripts_result=asyncio.run(run (config.script_elections_just_started))
+                runscript (config.script_elections_opened)
+#                try:
+#                    config.script_elections_opened
+#                except NameError:
+#                    pass
+#                else:
+#                    if config.script_elections_opened != '':
+#                        scripts_result=asyncio.run(run (config.script_elections_opened))
                     #
-                # S - enables recheck if elections are open and just started 
-                if recheck('S'):
+                # O - enables recheck if elections are opened (between 'just started' and 'about to close')
+                if recheck('O'):
                     wait_until=now_posix+config.recheck_offset
                 else:
                     wait_until=elections_end-config.close_offset
@@ -209,6 +245,6 @@ if __name__ == '__main__':
             ftecd()
         except:
             with open (config.LogDaemon, 'a') as f:
-                print("==== An exception caught ====\n{}\n{}\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]), file=f)
+                print("==== An exception caught at {} ====\n{}\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]), file=f)
                 sys.exit(0)
 
