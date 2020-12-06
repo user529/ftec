@@ -13,7 +13,7 @@ script_at_start_of_new_cycle=''
 # Logging section
 LogDaemon='/opt/ftecheck/daemon.log'
 LogFile='/opt/ftecheck/ftecheck.log'
-LogFormat='%(asctime)s %(levelname)s %(module)s %(funcName)s %(messages)s'
+LogFormat='%(asctime)s %(levelname)s %(module)s %(funcName)s %(message)s'
 #LogLevel=logging.DEBUG
 #LogLevel=logging.WARNING
 LogLevel=logging.INFO
