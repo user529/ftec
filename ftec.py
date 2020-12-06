@@ -185,7 +185,7 @@ def ftecd():
             elif (now_posix-config.start_offset) <= elections_start:
                 logging.info("Elections just started. {} / {}".format(elections_end, timeconv(elections_end,'L')))
                 #
-                runscript (config.script_elections_about_to_close)
+                runscript (config.script_elections_just_started)
 #                try:
 #                    config.script_elections_about_to_close
 #                except NameError:
