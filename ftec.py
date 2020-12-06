@@ -60,6 +60,15 @@ def recheck (mode):
     return False
 
 
+def check_result (output):
+    if output == '':
+        logging.info("ERROR! Got not valid result. Possibly FreeTON network is down.")
+        return False
+    else:
+        return True
+    #
+
+
 def runscript (script):
     try:
         script
@@ -89,18 +98,31 @@ def ftecd():
         #
         get_active_election="ftn runget active_election_id | grep 'Result:' | awk '{ print $2 }' | tr -d '[]\"'"
         active_election_hex=asyncio.run(run (get_active_election))
+        if not check_result (active_election_hex):
+            seconds=config.offset
+            logging.info("Sleep {} sec".format(seconds))
+            time.sleep(seconds)
+            continue
+        #
         active_election_dec=int(active_election_hex,16)
         logging.info("Active elections id {} / {}".format(active_election_hex, active_election_dec))
         #
         # Get time when the current round ends
         get_until="ftn getconfig 34 | grep 'utime_until' | awk '{print $2}'"
-        curr_until_posix=int(asyncio.run(run (get_until)))
+        get_until_res=asyncio.run(run (get_until))
+        if not check_result (get_until_res):
+            seconds=config.offset
+            logging.info("Sleep {} sec".format(seconds))
+            time.sleep(seconds)
+            continue
+        #
+        curr_until_posix=int(get_until_res)
         curr_until_local=timeconv(curr_until_posix, 'L')
         logging.info("Current round until {} / {}".format(curr_until_posix,curr_until_local))
         #
         if now_posix > curr_until_posix:
             logging.info("Seems the current round is over but the next is not started. Possibly FreeTON network is down.")
-            seconds=3600
+            seconds=1800
             logging.info("Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
@@ -108,9 +130,24 @@ def ftecd():
         #  "elections_end_before": 8192,
         #  "elections_start_before": 32768,
         get_start_offset="ftn getconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
-        start_offset=int(asyncio.run(run (get_start_offset)))
+        get_start_r=asyncio.run(run (get_start_offset))
+        if not check_result (get_start_r):
+            seconds=config.offset
+            logging.info("Sleep {} sec".format(seconds))
+            time.sleep(seconds)
+            continue
+        #
+        start_offset=int(get_start_r)
+
         get_end_offset="ftn getconfig 15 | grep elections_end_before | awk '{print $2}' | tr -d ,"
-        end_offset=int(asyncio.run(run (get_end_offset)))
+        get_end_offset_r=asyncio.run(run (get_end_offset))
+        if not check_result (get_end_offset_r):
+            seconds=config.offset
+            logging.info("Sleep {} sec".format(seconds))
+            time.sleep(seconds)
+            continue
+        #
+        end_offset=int(get_end_offset_r)
         #
         elections_start=curr_until_posix-start_offset
         elections_end=curr_until_posix-end_offset
