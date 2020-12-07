@@ -199,7 +199,7 @@ def ftecd():
                 if recheck('S'):
                     wait_until=now_posix+config.recheck_offset
                 else:
-                    wait_until=elections_end-config.close_offset
+                    wait_until=elections_start+config.start_offset
                 #
             else:
                 logging.info("Elections are opened. {} / {}".format(elections_end, timeconv(elections_end,'L')))
