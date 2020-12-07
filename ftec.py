@@ -72,6 +72,7 @@ def check_result (output):
 def runscript (script):
     try:
         script
+        result=''
     except NameError:
         result=''
     else:
