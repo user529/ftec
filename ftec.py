@@ -88,8 +88,8 @@ def runscript (script):
 
 def ftecd():
     logging.basicConfig(filename=config.LogFile, format=config.LogFormat, level=config.LogLevel)
-    lh=logging.FileHandler(config.LogFile)
-    logging.getLogger('').addHandler(lh)
+    #lh=logging.FileHandler(config.LogFile)
+    #logging.getLogger('').addHandler(lh)
     #
     logging.info("ftecheck daemon entering")
     while True:
