@@ -142,6 +142,7 @@ def ftecd():
         pattern="Config p15:"
         n=getconfig15_raw.find(pattern)
         getconfig15_str=getconfig15_raw[n+len(pattern):]
+        getconfig15_str=getconfig15_str.split("\n")
         #get_start_offset="ftn getconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
         #get_start_r=asyncio.run(run (get_start_offset))
 
