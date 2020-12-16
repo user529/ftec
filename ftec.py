@@ -123,7 +123,7 @@ def ftecd():
         logging.info("Current round until {} / {}".format(curr_until_posix,curr_until_local))
         #
         if now_posix > curr_until_posix:
-            logging.info("Seems the current round is over but the next is not started. Possibly FreeTON network is down.")
+            logging.info("Seems the current round is over but the next is not started. Possibly the FreeTON network is down.")
             seconds=1800
             logging.info("Sleep {} sec".format(seconds))
             time.sleep(seconds)
@@ -131,25 +131,28 @@ def ftecd():
         #
         #  "elections_end_before": 8192,
         #  "elections_start_before": 32768,
-        get_start_offset="ftn getconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
-        get_start_r=asyncio.run(run (get_start_offset))
-        if not check_result (get_start_r):
+        getconfig15_cmd="ftn getconfig 15"
+        getconfig15_raw=asyncio.run(run (getconfig15_cmd))
+        if not check_result (getconfig15_raw):
             seconds=config.offset
             logging.info("Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
         #
-        start_offset=int(get_start_r)
+        pattern="Config p15:"
+        n=getconfig15_raw.find(pattern)
+        getconfig15_str=getconfig15_raw[n+len(pattern):]
+        #get_start_offset="ftn getconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
+        #get_start_r=asyncio.run(run (get_start_offset))
 
-        get_end_offset="ftn getconfig 15 | grep elections_end_before | awk '{print $2}' | tr -d ,"
-        get_end_offset_r=asyncio.run(run (get_end_offset))
-        if not check_result (get_end_offset_r):
-            seconds=config.offset
-            logging.info("Sleep {} sec".format(seconds))
-            time.sleep(seconds)
-            continue
-        #
-        end_offset=int(get_end_offset_r)
+        for line in getconfig15_str:
+            if line.find("elections_start_before") > 0:
+                l=line.split(":")
+                start_offset=int(l[1].strip(', '))
+            elif line.find("elections_end_before") > 0:
+                l=line.split(":")
+                end_offset=int(l[1].strip(', '))
+            #
         #
         elections_start=curr_until_posix-start_offset
         elections_end=curr_until_posix-end_offset
