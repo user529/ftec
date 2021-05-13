@@ -110,7 +110,7 @@ def ftecd():
         logging.info("Active elections id {} / {}".format(active_election_hex, active_election_dec))
         #
         # Get time when the current round ends
-        get_until="ftn getconfig 34 | grep 'utime_until' | awk '{print $2}'"
+        get_until="ftn getconfig 34 | grep 'utime_until' | awk '{print $2}' | tr -d ,"
         get_until_res=asyncio.run(run (get_until))
         if not check_result (get_until_res):
             seconds=config.offset
@@ -218,6 +218,10 @@ def ftecd():
             #
         #
         seconds=wait_until-now_posix
+        if seconds <= 0:
+            logging.info("Got negative seconds! {} sec. Applying standard offset {} sec".format(seconds, config.offset))
+            seconds=config.offset
+        #
         logging.info("Sleep {} sec".format(seconds))
         time.sleep(seconds)
     #

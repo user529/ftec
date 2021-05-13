@@ -20,7 +20,7 @@ LogLevel=logging.INFO
 #
 #############################
 # offset in seconds 10m=600
-offset=600          # general fime offset
+offset=600          # general time offset
 close_offset=300    # how many seconds before the end of the elections to start the 'script_elections_about_to_close'
 start_offset=1200    # how many seconds before the end of the elections to start the 'script_elections_just_started'
 recheck_offset=60   # offset for rechecking
