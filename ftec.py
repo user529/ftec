@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import asyncio, pty, os, signal, multiprocessing, time, datetime, logging, sys, re #, daemon, daemon.pidfile #lockfile
+import asyncio, pty, os, signal, multiprocessing, time, datetime, logging, sys, re, traceback #, daemon, daemon.pidfile #lockfile
 
 #############################
 #
@@ -232,7 +232,7 @@ def ftecd():
 stop_event = multiprocessing.Event()
 
 def sigterm_handler(_signo, _frame):
-    "When sysvinit sends the TERM signal, cleanup before exiting."
+#    "When sysvinit sends the TERM signal, cleanup before exiting."
     print("[" + datetime.datetime.now() + "] received signal {}, exiting...".format(_signo))
     #cleanup_pins()
     sys.exit(0)
@@ -244,7 +244,10 @@ if __name__ == '__main__':
         try:
             ftecd()
         except:
+            exc_type, exc_value, exc_traceback = sys.exc_info()
             with open (config.LogDaemon, 'a') as f:
-                print("==== An exception caught at {} ====\n{}\n{}\n{}\n==== Exception end =====\n".format(datetime.datetime.now(),sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]), file=f)
-                sys.exit(0)
+                print("==== An exception caught at {} ====\n".format(datetime.datetime.now(), file=f))
+                traceback.print_exception(exc_type, exc_value, exc_traceback, file=f)
+                print("==== Exception end =====\n", file=f)
+            sys.exit(0)
 
