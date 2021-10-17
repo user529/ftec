@@ -122,12 +122,32 @@ def ftecd():
         curr_until_local=timeconv(curr_until_posix, 'L')
         logging.info("Current round until {} / {}".format(curr_until_posix,curr_until_local))
         #
-        if (active_election_dec == 0) and (now_posix > curr_until_posix):
-            logging.info("Seems there is no active election, the current round is over and the next is not started. Possibly the FreeTON network is down.")
-            seconds=1800
-            logging.info("Sleep {} sec".format(seconds))
-            time.sleep(seconds)
-            continue
+        if now_posix > curr_until_posix:
+            logging.info("Seems the current round is over and the next is not started. Possibly the FreeTON network was down.")
+            logging.info("Just in case, checking info about the next round (p36)")
+            # Get time when the next round ends
+            get_until36="ftn getconfig 36 | grep 'utime_until' | awk '{print $2}' | tr -d ,"
+            get_until36_res=asyncio.run(run (get_until36))
+            if not check_result (get_until36_res):
+                seconds=config.offset
+                logging.info("Got an incorrect result. Sleep {} sec".format(seconds))
+                time.sleep(seconds)
+                continue
+            #
+            next_until_posix=int(get_until36_res)
+            next_until_local=timeconv(next_until_posix, 'L')
+            logging.info("Next round until {} / {}".format(next_until_posix,next_until_local))
+            if (now_posix > next_until_posix) and (active_election_dec == 0):
+                logging.info("Time for the next round is over and no active election. The FreeTON network is down.")
+                seconds=1800
+                logging.info("Sleep {} sec".format(seconds))
+                time.sleep(seconds)
+                continue
+            else:
+                # Due to the FreeTON network issues, let's consider the next round as the current
+                curr_until_posix=next_until_posix
+                curr_until_local=next_until_local
+            #
         #
         #  "elections_end_before": 8192,
         #  "elections_start_before": 32768,
