@@ -102,7 +102,7 @@ def ftecd():
         active_election_hex=asyncio.run(run (get_active_election))
         if not check_result (active_election_hex):
             seconds=config.offset
-            logging.info("Sleep {} sec".format(seconds))
+            logging.info("Got an incorrect result. Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
         #
@@ -114,7 +114,7 @@ def ftecd():
         get_until_res=asyncio.run(run (get_until))
         if not check_result (get_until_res):
             seconds=config.offset
-            logging.info("Sleep {} sec".format(seconds))
+            logging.info("Got an incorrect result. Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
         #
@@ -122,8 +122,8 @@ def ftecd():
         curr_until_local=timeconv(curr_until_posix, 'L')
         logging.info("Current round until {} / {}".format(curr_until_posix,curr_until_local))
         #
-        if now_posix > curr_until_posix:
-            logging.info("Seems the current round is over but the next is not started. Possibly the FreeTON network is down.")
+        if (active_election_dec == 0) and (now_posix > curr_until_posix):
+            logging.info("Seems there is no active election, the current round is over and the next is not started. Possibly the FreeTON network is down.")
             seconds=1800
             logging.info("Sleep {} sec".format(seconds))
             time.sleep(seconds)
@@ -135,7 +135,7 @@ def ftecd():
         getconfig15_raw=asyncio.run(run (getconfig15_cmd))
         if not check_result (getconfig15_raw):
             seconds=config.offset
-            logging.info("Sleep {} sec".format(seconds))
+            logging.info("Got an incorrect result. Sleep {} sec".format(seconds))
             time.sleep(seconds)
             continue
         #
