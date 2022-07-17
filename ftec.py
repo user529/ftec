@@ -99,7 +99,7 @@ def ftecd():
         logging.info("ftecheck started at {} / {}".format(now_posix, now_local))
         #
         get_active_election="fts.py get_election_id"
-        active_election_dec=asyncio.run(run (get_active_election))
+        active_election_dec=int(asyncio.run(run (get_active_election)))
         if not check_result (active_election_dec):
             seconds=config.offset
             logging.info("Got an incorrect result. Sleep {} sec".format(seconds))
