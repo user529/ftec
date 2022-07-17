@@ -106,7 +106,7 @@ def ftecd():
             time.sleep(seconds)
             continue
         #
-        logging.info("Active elections id {}".format active_election_dec))
+        logging.info("Active elections id {}".format active_election_dec)
         #
         # Get time when the current round ends
         get_until="fts.py getconfig 34 | grep 'utime_until' | awk '{print $2}' | tr -d ,"
