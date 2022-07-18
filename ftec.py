@@ -98,7 +98,7 @@ def ftecd():
         now_posix=timeconv(now_local, 'P')
         logging.info("ftecheck started at {} / {}".format(now_posix, now_local))
         #
-        get_active_election="fts.py get_election_id"
+        get_active_election="fts.py --nodebug get_election_id"
         active_election_dec=int(asyncio.run(run (get_active_election)))
         if not check_result (active_election_dec):
             seconds=config.offset
@@ -109,7 +109,7 @@ def ftecd():
         logging.info("Active elections id {}".format active_election_dec)
         #
         # Get time when the current round ends
-        get_until="fts.py getconfig 34 | grep 'utime_until' | awk '{print $2}' | tr -d ,"
+        get_until="fts.py --nodebug getconfig 34 | jq .utime_until"
         get_until_res=asyncio.run(run (get_until))
         if not check_result (get_until_res):
             seconds=config.offset
@@ -125,7 +125,7 @@ def ftecd():
             logging.info("Seems the current round is over and the next is not started. Possibly the FreeTON network was down.")
             logging.info("Just in case, checking info about the next round (p36)")
             # Get time when the next round ends
-            get_until36="fts.py getconfig 36 | grep 'utime_until' | awk '{print $2}' | tr -d ,"
+            get_until36="fts.py --nodebug getconfig 36 | jq .utime_until"
             get_until36_res=asyncio.run(run (get_until36))
             if not check_result (get_until36_res):
                 seconds=config.offset
@@ -150,7 +150,7 @@ def ftecd():
         #
         #  "elections_end_before": 8192,
         #  "elections_start_before": 32768,
-        getconfig15_cmd="fts.pygetconfig 15"
+        getconfig15_cmd="fts.py --nodebug getconfig 15"
         getconfig15_raw=asyncio.run(run (getconfig15_cmd))
         if not check_result (getconfig15_raw):
             seconds=config.offset
@@ -162,7 +162,7 @@ def ftecd():
         n=getconfig15_raw.find(pattern)
         getconfig15_str=getconfig15_raw[n+len(pattern):]
         getconfig15_str=getconfig15_str.split("\n")
-        #get_start_offset="fts.pygetconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
+        #get_start_offset="fts.py getconfig 15 | grep elections_start_before | awk '{print $2}' | tr -d ,"
         #get_start_r=asyncio.run(run (get_start_offset))
 
         for line in getconfig15_str:
